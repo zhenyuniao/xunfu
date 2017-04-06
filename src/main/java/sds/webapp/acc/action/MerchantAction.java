@@ -157,6 +157,7 @@ public class MerchantAction extends BaseAction {
 		}
 
 		if (merchantService.findByKey(merchantDomain) == null) {
+			merchantDomain.setAppCode("EA"+merchantDomain.getAccount());
 			merchantDomain.setStatus(0);// 审核中
 			int i = merchantService.register(merchantDomain);
 			if (i > 0) {

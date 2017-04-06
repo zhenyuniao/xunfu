@@ -214,7 +214,7 @@ function outLogin(){
                 <button type="button" class="navbar-toggle collapsed" id="bjui-navbar-collapsebtn" data-toggle="collapsenavbar" data-target="#bjui-navbar-collapse" aria-expanded="false">
                     <i class="fa fa-angle-double-right"></i>
                 </button>
-                <a class="navbar-brand" href=""><img src="./images/logo01.png" width="126"height="47"></a>
+                <a class="navbar-brand" href=""><img src="./images/logo.png" width="65"height="47"></a>
             </div>
             <nav class="collapse navbar-collapse" id="bjui-navbar-collapse" >
                 <ul class="nav navbar-nav navbar-right" id="bjui-hnav-navbar">
