@@ -35,13 +35,17 @@ public class LoginAction {
 			// 成功
 			Subject subject = SecurityUtils.getSubject();
 			Principal principal = (Principal) subject.getPrincipal();
-	
+
 			if (principal == null) {
 				// 非法请求
 				return loginFail("IncorrectCredentialsException", httpServletRequest, httpServletResponse);
 			}
-			//增加session
-			httpServletRequest.getSession().setAttribute("username",principal.getUserDomain().getAccount());
+
+			// 增加session 还需要考虑
+			boolean mobile = WebUtils.isTrue(httpServletRequest, PasswordShiroFilter.DEFAULT_MOBILE_PARAM);
+			if (!mobile) {
+				httpServletRequest.getSession().setAttribute("username", principal.getUserDomain().getAccount());
+			}
 			return JSONUtil.toJsonString(new JsonResult(JsonResult.SUCCESS, principal.getUserName()));
 
 		} else {
