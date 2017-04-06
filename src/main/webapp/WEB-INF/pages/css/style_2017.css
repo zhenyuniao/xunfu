@@ -1,0 +1,100 @@
+body{
+    background: url(../imgs/bannerg.png) top center no-repeat;
+    background-size:  cover;
+}
+img{
+    width: 100%;
+}
+.mui-content{
+    background: none;
+}
+.friname{
+    font-size: 0.8rem;
+    color: #916735;
+    padding: 0.4rem 0.8rem;
+    background: #f4ecc2;
+    width: 70%;
+    margin-left: 15%;
+    border-radius: 0.4rem;
+    border: 4px solid #ffd573;
+    margin-top: 70%;
+}
+.friname span	{
+    color: #ff4b4a;
+}
+.bg-img{
+    display: block;
+}
+input{
+    border: none !important;
+    font-size: 0.8rem !important;
+    color: #c5c5c5 !important;
+    border-radius: 0.5rem !important;
+}
+.inp-row{
+    width: 90% !important;
+    margin-top: 10%;
+    margin-left: 5%;
+}
+.inp-rowt{
+    width: 44% !important;
+    margin-top: 0.4rem;
+    margin-left: 5%;
+}
+.inp-rowtt{
+    width: 90% !important;
+    margin-top: 0.4rem;
+    margin-left: 5%;
+}
+.inp-rowttt{
+    width: 90% !important;
+    margin-top: 0.4rem;
+    margin-left: 5%;
+}
+.codbtn{
+    font-size: 0.8rem !important;
+    width: 44% !important;
+
+
+    /*
+background: #ff6060 !important;
+margin-top: 0.4rem !important;*/
+    margin-right: 5% !important;
+    text-align: center !important;
+    color: white !important;
+    border-radius: 0.5rem !important;
+    float: right !important;
+    line-height: 40px;
+    height: 40px;
+}
+.codbtn img{
+    width: 100% !important; height:auto;
+}
+.xietext{
+    font-size: 0.8rem;
+    text-align: center;
+    color: #916735;
+    margin-top: 0.4rem;
+    display: block;
+    width: 100%;
+}
+.xietext span{
+    color: #e94746;
+}
+.btn-tj{
+    margin-top: 0.4rem;
+}
+.logopt{
+    width: 30%;
+    margin-top: 0.4rem;
+    margin-left: 35%;
+}
+.textbg{
+    font-size: 0.8rem;
+    text-align: center;
+    display: block;
+    width: 100%;
+    margin-top: 0.4rem;
+    margin-bottom: 0.4rem;
+    color: #916735;
+}

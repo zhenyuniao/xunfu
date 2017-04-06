@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <meta charset="utf-8">
+	    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	    <title>新用户注册</title>
+	    <link href="css/mui.min.css" rel="stylesheet"/>
+	    <link rel="stylesheet" href="css/style_2017.css" />
+		<script src="js/jquery.min.js"></script>
+	</head>
+	<body>
+		<div class="mui-content">
+		     <div  class="friname">您最明智的好友 :&nbsp;<span id="friphone"></span></div>
+		     <input class="inp-row" type="text"  value="" placeholder="请输入您的手机号码" style="margin-top: 18rem;"/>
+		     <input class="inp-rowt" type="text"  value="" placeholder="请输入验证码"/>
+		     <div class="codbtn"> <img   src="imgs/vertify.png"/></div>
+		     <input class="inp-rowtt" type="password" placeholder="请输入您密码"/>
+		     <input class="inp-rowttt" type="password" placeholder="请再次输入您的密码"/>
+		     <div class="xietext">注册即同意<span><a href="http://finance.baijiejinrong.com/appapi3/zhucexieyi.html">《用户注册协议》</a></span></div>
+		     <img id="submit" class="btn-tj" src="imgs/btntj2017.png" />
+		     <a href="http://sj.qq.com/myapp/detail.htm?apkName=io.dcloud.H59FD91B5">
+			     <img class="logopt" src="imgs/logopt2017.png"/>
+			     <div class="textbg">点此下载码付App哦～</div>
+		     </a>
+		</div>
+		<script src="js/mui.min.js"></script>
+		<script type="text/javascript" src="js/castapp.js" ></script>
+	</body>
+	<script type="text/javascript">
+		ca.init();
+		//元素获取
+		var friPhone = mui('#friphone')[0];
+		var userPhone = mui('.inp-row')[0];
+		var userCod  = mui('.inp-rowt')[0];
+		var codBtn = mui('.codbtn')[0];
+		var userPwd = mui('.inp-rowtt')[0];
+		var userPwdCopy = mui('.inp-rowttt')[0];
+		var sendBtn = mui('.btn-tj')[0];
+
+		function GetQueryString(name){
+			var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+			var r = window.location.search.substr(1).match(reg);
+			if(r!=null)return  unescape(r[2]); return null;
+		};
+
+		//邀请好友电话显示
+		friPhone.innerHTML = GetQueryString("p");
+		//开关
+		var onoff = true;
+		//获取验证码
+		codBtn.addEventListener('tap', function() {
+			var userPhone = mui('.inp-row')[0].value;
+			var num = 60;
+			if(userPhone.length != 11){
+				ca.prompt('请输入正确的手机号码');
+				return;
+			}else{
+				//判断验证码是否发送
+				if(!onoff) {
+					return;
+				}
+				//验证码定时器
+				var timer = setInterval(function() {
+					num--;
+					if(num < 1) {
+						codBtn.innerHTML = '发送验证码';
+						onoff = true;
+						clearInterval(timer); //清除验证码
+						onoff = true;
+					} else {
+						codBtn.innerHTML = num + 's';
+						onoff = false;
+					}
+				}, 1000);
+				$.ajax({
+					url:"http://139.129.227.131:8080/sds/merchant.do?type=getRegisterVerificationCode",
+					data:{account:userPhone},
+					type:"POST",
+					success:function (data){
+						data = JSON.parse(data);
+						if(data) {
+							//ca.prompt(data.info);
+                            alert(data.message);
+						}
+					}
+				});
+			}
+		});
+
+		//注册操作
+		document.getElementById("submit").onclick = function() {
+			//获取元素
+			var userPhone = mui('.inp-row')[0].value;
+			var userCod  = mui('.inp-rowt')[0].value;
+			var userPwd = mui('.inp-rowtt')[0].value;
+			var userPwdCopy = mui('.inp-rowttt')[0].value;
+			//判断格式
+			if(userPhone == '' || userPhone.length != 11) {
+				ca.prompt('您输入的手机号有误');
+				return;
+			};
+			if(userCod == '' || userCod.length != 6) {
+				ca.prompt('您输入的手机验证码不正确');
+				return;
+			};
+			if(userPwd == '') {
+				ca.prompt('您输入的密码格式不正确');
+				return;
+			};
+			if(userPwd != userPwdCopy) {
+				ca.prompt('您两次输入的密码不一致');
+				return;
+			};
+			//发送注册请求
+			var ref = GetQueryString("r");
+			ca.post({
+				url: 'http://139.129.227.131:8080/sds/merchant.do?type=register',
+				data: {
+					account: userPhone,//注册手机号
+					password: userPwd,//注册密码
+					user_pwd_confirm: userPwdCopy,
+					appCode: userCod,//注册验证码
+					'userType': 2
+				},
+				succFn: function(data) {
+					data = JSON.parse(data);
+					if(data) {
+						//ca.prompt(data.info);
+                                                alert(data.info);
+						if(data.status) {
+							window.location.href = "http://sj.qq.com/myapp/detail.htm?apkName=io.dcloud.H59FD91B5";
+						}
+					} else {
+						ca.prompt('网络延时');
+						return;
+					}
+				},
+				errFn: function(data) {
+					ca.prompt('网络延时');
+					return;
+				}
+			});
+		};
+	</script>
+</html>
