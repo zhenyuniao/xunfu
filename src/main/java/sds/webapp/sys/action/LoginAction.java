@@ -46,11 +46,9 @@ public class LoginAction {
 			}
 
 			return JSONUtil.toJsonString(new JsonResult(JsonResult.SUCCESS, principal.getUserName()));
-
 		} else {
 			// 失败
 			System.out.println(errorClassName);
-
 			return loginFail(errorClassName, httpServletRequest, httpServletResponse);
 		}
 	}
