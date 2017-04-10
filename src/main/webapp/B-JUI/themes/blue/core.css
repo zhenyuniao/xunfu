@@ -9,7 +9,7 @@ fieldset{border-color:#fafafa;}
 #bjui-top .nav > li > a:hover,
 #bjui-top .nav > li > a.active,
 #bjui-top .nav > li > a:focus{background-color:#293038;}//换皮肤按钮颜色
-#bjui-navbar{background-color:#fff;} //logo区颜色
+#bjui-navbar{background-color:#56afed;} //logo区颜色
 #bjui-navbar.navbar-header a.brand{background-color:#293038 !important;}
 #bjui-navbar .navbar-header button:hover{background-color:#293038 !important;}
 #bjui-navbar .navbar-nav > li > a{color:#293038;} //菜单选项字体颜色

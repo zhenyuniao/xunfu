@@ -105,7 +105,7 @@ function changeCode(){
 }
 function choose_bg() {
     var bg = Math.floor(Math.random() * 0 + 1);
-    $('body').css('background-image', 'url(images/loginbg_0'+ bg +'.jpg)');
+    $('body').css('background-image', 'url(images/loginbg_0'+ bg +'.png)');
 }
 </script>
 </head>
@@ -127,7 +127,7 @@ function choose_bg() {
         <form  id="login_form" >
             <input type="hidden" value="" id="j_randomKey" />
             <input type="hidden" name="jfinal_token" value="" />
-            <p class="text-center logo"><img src="images/logo.png" width="320" height="45"></p>
+            <p class="text-center logo"><img src="images/logo.png" width="112" height="45"></p>
             <div class="login_msg text-center"><font color="red"></font></div>
             <div class="form-group">
                 <div class="input-group">
