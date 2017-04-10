@@ -229,7 +229,7 @@
 							<targetPath>WEB-INF/lib</targetPath>
 							<includes>
 								<!-- <include>**/*.jar</include> -->
-								<include>quicktool-1.2.jar</include>
+								<include>quicktool.jar</include>
 							</includes>
 						</resource>
 					</webResources>
