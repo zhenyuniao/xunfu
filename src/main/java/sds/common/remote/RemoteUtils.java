@@ -1,5 +1,9 @@
 package sds.common.remote;
 
+import com.riozenc.quicktool.common.util.json.JSONUtil;
+import com.riozenc.quicktool.common.util.log.LogUtil;
+import com.riozenc.quicktool.common.util.log.LogUtil.LOG_TYPE;
+
 import sds.common.remote.domain.DownloadKeyDomain;
 import sds.common.remote.domain.RegisterDomain;
 import sds.webapp.acc.domain.MerchantDomain;
@@ -180,6 +184,7 @@ public class RemoteUtils {
 	public static boolean resultProcess(RemoteResult remoteResult) throws Exception {
 		ConfDomain confDomain = ConfAction.getConfig(ConfAction.REMOTE_RESULT).get(remoteResult.getRespCode());
 		remoteResult.setMsg(confDomain.getRemark());
+		LogUtil.getLogger(LOG_TYPE.IO).info(JSONUtil.toJsonString(remoteResult));
 		if ("000000".equals(remoteResult.getRespCode())) {
 			return true;
 		}

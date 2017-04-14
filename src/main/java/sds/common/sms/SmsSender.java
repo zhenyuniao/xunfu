@@ -30,7 +30,7 @@ public class SmsSender {
 	private final static String url = "http://sms.253.com/msg/send";
 	private final static String un = "N4054934";
 	private final static String pw = "9PoAcNKBsb2da8";
-	private final static String msg = "【马付】您好，您的验证码是";
+	private final static String msg = "【迅码支付】您好，您的验证码是";
 
 	public static String send(String account) {
 		try {
