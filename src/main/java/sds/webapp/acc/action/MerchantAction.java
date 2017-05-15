@@ -6,8 +6,10 @@ import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,6 +29,7 @@ import com.riozenc.quicktool.common.util.log.LogUtil.LOG_TYPE;
 import com.riozenc.quicktool.config.Global;
 
 import sds.common.exception.InvalidAppCodeException;
+import sds.common.jgpush.Jpush;
 import sds.common.json.JsonGrid;
 import sds.common.json.JsonResult;
 import sds.common.pool.MerchantPool;
@@ -34,6 +37,7 @@ import sds.common.pool.PoolBean;
 import sds.common.remote.RemoteResult;
 import sds.common.remote.RemoteUtils;
 import sds.common.remote.RemoteUtils.REMOTE_TYPE;
+import sds.common.remote.util.NameUtil;
 import sds.common.security.util.UserUtils;
 import sds.common.sms.SmsCache;
 import sds.common.sms.SmsSender;
@@ -42,6 +46,8 @@ import sds.webapp.acc.domain.MerchantDomain;
 import sds.webapp.acc.domain.UserDomain;
 import sds.webapp.acc.service.MerchantService;
 import sds.webapp.acc.service.UserService;
+import sds.webapp.sys.action.ConfAction;
+import sds.webapp.sys.domain.ConfDomain;
 
 @ControllerAdvice
 @RequestMapping("merchant")
@@ -62,7 +68,8 @@ public class MerchantAction extends BaseAction {
 	 */
 	@ResponseBody
 	@RequestMapping(params = "type=getRegisterVerificationCode")
-	public String getRegisterVerificationCode(String account) {
+	public String getRegisterVerificationCode(String account, HttpServletRequest httpServletRequest,
+			HttpServletResponse httpServletResponse) {
 
 		return JSONUtil.toJsonString(SmsSender.send(account));
 	}
@@ -117,7 +124,9 @@ public class MerchantAction extends BaseAction {
 	 */
 	@ResponseBody
 	@RequestMapping(params = "type=register", method = RequestMethod.POST)
-	public String registerMerchant(MerchantDomain merchantDomain, String code) throws Exception {
+	public String registerMerchant(MerchantDomain merchantDomain, String code, HttpServletResponse httpServletResponse)
+			throws Exception {
+
 		String tjAccount = null;
 		String appCode = merchantDomain.getAppCode();// 邀请码
 
@@ -383,11 +392,12 @@ public class MerchantAction extends BaseAction {
 			}
 
 			merchantService.update(merchantDomain);
-
+			Jpush.SendPushSH(merchantDomain.getAccount(), "恭喜您通过审核", "审核商户成功");
 			return JSONUtil.toJsonString(new JsonResult(JsonResult.SUCCESS, "审核商户成功."));
 		} else {// 拒绝通过
-			merchantService.update(merchantDomain);//更新审核状态与失败原因
-			return JSONUtil.toJsonString(new JsonResult(JsonResult.SUCCESS, "商户审核已拒绝."));
+			merchantService.update(merchantDomain);// 更新审核状态与失败原因
+			Jpush.SendPushSH(merchantDomain.getAccount(),"失败原因"+merchantDomain.getOther(), "审核商户成功");
+			return JSONUtil.toJsonString(new JsonResult(JsonResult.SUCCESS, "审核商户成功."));
 		}
 
 	}
@@ -436,6 +446,13 @@ public class MerchantAction extends BaseAction {
 	@RequestMapping(params = "type=validCard")
 	public String validCard(MerchantDomain merchantDomain, HttpServletRequest request) throws Exception {
 		MerchantDomain temp = UserUtils.getPrincipal().getMerchantDomain();
+		Map<String, ConfDomain> map = ConfAction.getConfig("MCC");
+		ConfDomain[] domains = new ConfDomain[map.size()];
+		map.values().toArray(domains);
+		Random random = new Random();
+		// 随机从list集合中取一个值并设置给组织机构代码
+		merchantDomain.setBusinessId(domains[random.nextInt(domains.length - 1)].getValue());
+		merchantDomain.setCmer(NameUtil.randomName() + domains[random.nextInt(domains.length - 1)].getName());
 		merchantDomain.setId(temp.getId());
 		merchantDomain.setStatus(1);
 
@@ -542,16 +559,18 @@ public class MerchantAction extends BaseAction {
 	@ResponseBody
 	@RequestMapping(params = "type=base64Upload")
 	public String base64Upload(String base64Data, String name, HttpServletRequest request) throws Exception {
+
+		System.out.println(JSONUtil.toJsonString(request.getParameterMap()));
+
 		String account = UserUtils.getPrincipal().getMerchantDomain().getAccount();
 		String fileName = account + File.separator + UserUtils.getPrincipal().getMerchantDomain().getAccount() + "_"
 				+ name;
 		String encodeFileName = Base64.getEncoder()
 				.encodeToString(HashUtils.getHash("SHA-512", fileName.getBytes(), null, 10));
-		String path = Global.getConfig("project.path") + Global.getConfig("file.doc.path") + File.separator
-				+ encodeFileName;
+		String path = Global.getConfig("project.path") + Global.getConfig("file.doc.path");
 
 		try {
-			File file = FileUtil.uploadPictureByBase64(base64Data, path);
+			File file = FileUtil.uploadPictureByBase64(base64Data, path, encodeFileName);
 			String path1 = file.getPath().substring(Global.getConfig("project.path").length(), file.getPath().length());
 
 			return JSONUtil.toJsonString(new JsonResult(JsonResult.SUCCESS, path1));

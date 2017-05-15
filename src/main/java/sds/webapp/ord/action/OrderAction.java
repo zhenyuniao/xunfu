@@ -3,6 +3,7 @@ package sds.webapp.ord.action;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.security.PrivateKey;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +16,14 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.mysql.fabric.xmlrpc.base.Data;
 import com.riozenc.quicktool.common.util.date.DateUtil;
+import com.riozenc.quicktool.common.util.http.HttpUtils;
 import com.riozenc.quicktool.common.util.json.JSONUtil;
 import com.riozenc.quicktool.common.util.log.LogUtil;
 import com.riozenc.quicktool.common.util.log.LogUtil.LOG_TYPE;
 
+import sds.common.jgpush.Jpush;
 import sds.common.json.JsonGrid;
 import sds.common.json.JsonResult;
 import sds.common.remote.RemoteResult;
@@ -67,6 +71,7 @@ public class OrderAction extends BaseAction {
 		MerchantDomain vm = merchantService.getVirtualMerchant(merchantDomain);
 
 		RemoteResult remoteResult = RemoteUtils.pay(vm, amount, info, channelCode);
+
 		if (RemoteUtils.resultProcess(remoteResult)) {
 			OrderDomain orderDomain = new OrderDomain();
 			orderDomain.setOrderId(remoteResult.getOrderId());
@@ -79,6 +84,8 @@ public class OrderAction extends BaseAction {
 			orderDomain.setRemark(info);
 			orderDomain.setStatus(0);// 0：未查询
 			orderService.insert(orderDomain);
+			// 推送
+
 		} else {
 			return JSONUtil.toJsonString(new JsonResult(JsonResult.ERROR, remoteResult.getMsg()));
 		}
@@ -167,16 +174,11 @@ public class OrderAction extends BaseAction {
 	@ResponseBody
 	@RequestMapping(params = "type=orderConfirmCallback")
 	public void orderConfirmCallback(OrderDomain orderDomain, String WXOrderNo) {
-
 		LogUtil.getLogger(LOG_TYPE.OTHER).info(JSONUtil.toJsonString(orderDomain) + "   [" + WXOrderNo + "]");
-
 		String orderId = orderDomain.getOrderId();
-
 		if (orderId.length() > 100) {
 			// 一码付订单生成
-
 			Map<String, String> map = merchantService.getRAandVP(orderDomain.getAccount());
-
 			PrivateKey privateKey;
 			try {
 				privateKey = RSAUtils.loadPrivateKey(map.get("privatekey"));
@@ -202,10 +204,15 @@ public class OrderAction extends BaseAction {
 			orderDomain.setAmount(amount.divide(new BigDecimal(100), 2, RoundingMode.DOWN).doubleValue());
 
 			if ("000000".equals(orderDomain.getRespCode())) {
+
 				orderDomain.setStatus(1);
 
 				Map<String, String> map = merchantService.getRAandVP(orderDomain.getAccount());
 				orderDomain.setAccount(map.get("account"));
+
+				Jpush.SendPush(orderDomain.getAccount(),orderDomain.getRealName(),orderDomain.getCmer(),orderDomain.getOrderId(),orderDomain.getAmount()+"");
+				LogUtil.getLogger(LOG_TYPE.IO)
+						.info(orderDomain.getAccount() + "交易金额为:" + orderDomain.getAmount() + "{支付成功}");
 
 				if (profitService.profit(orderDomain) > 0) {
 					LogUtil.getLogger(LOG_TYPE.OTHER).info(orderDomain.getOrderId() + "（回调查询）交易成功,分润成功[" + WXOrderNo
@@ -231,6 +238,12 @@ public class OrderAction extends BaseAction {
 
 				RemoteResult remoteResult = RemoteUtils.orderConfirm(vm, orderDomain.getOrderId());
 				if (RemoteUtils.resultProcess(remoteResult)) {
+					// 推送
+
+					Jpush.SendPush(orderDomain.getAccount(),orderDomain.getRealName(),orderDomain.getCmer(),orderDomain.getOrderId(),orderDomain.getAmount()+"");
+					LogUtil.getLogger(LOG_TYPE.IO)
+							.info(orderDomain.getAccount() + "交易金额为:" + orderDomain.getAmount() + "{支付成功}");
+					;
 					// 更新
 					orderDomain.setStatus(1);
 					orderDomain.setOrderNo(WXOrderNo);
@@ -244,6 +257,7 @@ public class OrderAction extends BaseAction {
 						LogUtil.getLogger(LOG_TYPE.OTHER).info(orderDomain.getOrderId() + "（回调查询）交易成功,分润失败[" + WXOrderNo
 								+ "]" + DateUtil.formatDate(new Date()));
 					}
+
 				} else {
 					orderDomain.setStatus(2);
 					orderDomain.setOrderNo(WXOrderNo);
@@ -305,7 +319,7 @@ public class OrderAction extends BaseAction {
 	@ResponseBody
 	@RequestMapping(params = "type=getOrderByMerchant")
 	public String getOrderByMerchant(OrderDomain orderDomain) {
-		List<OrderDomain> list = orderService.getOrderByUser(orderDomain);
+		List<OrderDomain> list = orderService.findByWhere(orderDomain);
 		return JSONUtil.toJsonString(new JsonGrid(orderDomain, list));
 	}
 
@@ -362,6 +376,42 @@ public class OrderAction extends BaseAction {
 	@RequestMapping(params = "type=purchasingCardCallbackTest")
 	public void purchasingCardCallbackTest(HttpServletRequest httpServletRequest) {
 		System.out.println(JSONUtil.toJsonString(httpServletRequest.getParameterMap()));
+	}
+
+	@ResponseBody
+	@RequestMapping(params = "type=oauthCallBack")
+	public String oauthCallBack(String amount, String channelCode, String code, String state,
+			HttpServletRequest servletRequest) {
+
+		System.out.println(JSONUtil.toJsonString(servletRequest.getParameterMap()));
+
+		StringBuffer sb = new StringBuffer();
+		sb.append("https://api.weixin.qq.com/sns/oauth2/access_token?");
+		sb.append("appid=wx4d18f260af8feed9");
+		sb.append("&");
+		sb.append("secret=").append("5857ed0c475b96fa8b5a96fdba56bea0");
+		sb.append("&");
+		sb.append("code=").append(code);
+		sb.append("&");
+		sb.append("grant_type=authorization_code");
+
+		try {
+			String result = HttpUtils.postSSL(sb.toString(), "", "UTF-8", 30);
+
+			// {"access_token":"WgUjxz6Y13MjLmCi-Ml4V3vFrfPfo2CXHskgunFtqWgx7Ij7u0nJ6GyAVmSU7TW-CQ79lPRbuymzgHQF2MgCvkIYAMPIbYJr93DZlK2bVR0","expires_in":7200,"refresh_token":"2YXU1_8jDDxnExO2h5IOlPEQ8bpGt6HUyLmAbXrmcDi-A_Tlti7ur2h7dxeohhEaPAeSg6F880FoT_wtQSa2SxaSjO9ZD2hxKOKvSuaMyB0","openid":"oneCHw3u881Vlf9tSxeEJ1rSopZs","scope":"snsapi_base"}
+
+			Map<String, String> map = JSONUtil.readValue(result, Map.class);
+			String openid = map.get("openid");
+
+			System.out.println("result:" + result);
+
+			return result;
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	// // 批量报备商户+柜台码支付接口（）
