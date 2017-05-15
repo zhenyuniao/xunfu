@@ -5,10 +5,12 @@
 $(function() {
 
 	$('#merchant_datagrid').datagrid({
-	    height: '100%',
+	    height: '95%',
 	    tableWidth:'99%',
 	    gridTitle : ' ',
 	    local:'remote',
+	    columnMenu:false,
+	    fieldSortable:false,
 	    showToolbar: false,
 	    filterThead:false,
 	    toolbarItem: 'del',
@@ -30,7 +32,7 @@ $(function() {
 	            name: 'realName',
 	            label: '真实姓名',
 	            align: 'center',
-	            width: 100
+	            width: 55
 	        },
 	        {
 	            name: 'mobile',
@@ -48,7 +50,7 @@ $(function() {
 	            name: 'parentName',
 	            label: '上级名称',
 	            align: 'center',
-	            width: 120
+	            width: 155
 	        },
 	        {
 	            name: 'userType',
@@ -69,7 +71,7 @@ $(function() {
 	            name: 'status',
 	            label: '状态',
 	            align: 'center',
-	            width: 70,
+	            width: 85,
 	            render: function(value) {
 	            	if(value == 0){
 	            		return "未提交资料";
@@ -94,7 +96,9 @@ $(function() {
 	            width:100,
 	            type:'date',
 	            pattern:'yyyy-MM-dd',
-	            render:function(value){return value?value.substr(0,20):value}
+	            render: function(value) {
+                    return value ? value.substr(0, 10) : value
+                }
 	        },
 	        {
 	            name: 'status',
@@ -116,7 +120,7 @@ $(function() {
 	            }
 	        }
 	    ],
-	    paging:{pageSize:5,selectPageSize:'10,20,30'},
+	    paging:{pageSize:20,selectPageSize:'20,30,40'},
 	    delUrl:'merchant.do?type=delete',
 	    delPK:'id',
 	    showLinenumber: false,

@@ -19,12 +19,14 @@ $.ajax({
 $(function() {
 		
 	$('#user_datagrid').datagrid({
-	    height: '100%',
+		height: '95%',
 	    tableWidth:'99.5%',
 	    gridTitle : ' ',
 	    local: 'remote',
 	    showToolbar: false,
 	    filterThead:false,
+	    columnMenu:false,
+	    fieldSortable:false,
 	    toolbarItem: 'del',
 	    dataUrl:"user.do?type=findUserByWhere",
 	    delUrl:'user.do?type=delete',
@@ -34,67 +36,54 @@ $(function() {
 	             name: 'account',
 	             label: '登录帐号',
 	             align: 'center',
-	             width: 130
+	             width: 60
 	         },
 	        {
 	            name: 'fullName',
 	            label: '企业名称',
 	            align: 'center',
-	            width: 200
+	            width: 160
 	        },
 	        {
 	            name: 'agType',
 	            label: '企业类型',
 	            align: 'center',
-	            width: 100
+	            width: 55
 	        },
 	        {
 	            name: 'regName',
 	            label: '法人姓名',
 	            align: 'center',
-	            width: 80
+	            width: 35
 	        },
 	        {
 	            name: 'parentName',
 	            label: '上级名称',
 	            align: 'center',
-	            width:125
-	        },
-	        {
-	            name: 'status',
-	            label: '状态',
-	            align: 'center',
-	            width: 70,
-	            render: function(value) {
-	            	if(value == 0){
-	            		return "未审核";
-	            	}else if(value == 1){
-	            		return "通过";
-	            	}else if(value == 2){
-	            		return "禁用";
-	            	}else{
-	            		return value;
-	            	}
-	                
-	            }
+	            width:160
 	        },
 	        {
 	            name: 'createDate',
 	            label: '注册时间',
 	            align: 'center',
-	            width:90
+	            type:'date',
+	            pattern:'yyyy-MM-dd',
+	            render: function(value) {
+                    return value ? value.substr(0, 10) : value
+                },
+	            width:50
 	        },
 	        {
 	            name: 'id',
 	            label: '操 作',
 	            align: 'center',
-	            width:100,
+	            width:35,
 	            render: function(value) {
 	            	return '<button type="button" class="btn-blue btn" data-icon="edit" onclick="dialog_user('+value+');">详情</button>';
 	            }
 	        }
 	    ],
-	    paging:{pageSize:5,selectPageSize:'10,20,30'},
+	    paging:{pageSize:20,selectPageSize:'20,30,40'},
 	    showLinenumber: false,
 	    inlineEditMult: false
 	})
@@ -121,7 +110,7 @@ function dialog_user(id) {
 			    height:500,
 			    onLoad:function(){
 			    	var selector=$('<select id="parentId" name="parentId" ></select>');  
-			    	selector.append('<option value="0">管理员</option>');  
+			    	//selector.append('<option value="0">管理员</option>');  
 					
 			    	for(var i=0;i< selectorData.length;i++){
 					  selector.append('<option value="'+selectorData[i].id+'">'+selectorData[i].fullName+'</option>');  

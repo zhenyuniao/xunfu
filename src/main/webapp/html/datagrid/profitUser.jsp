@@ -9,9 +9,11 @@ $(function() {
 	    tableWidth:'99%',
 	    gridTitle : ' ',
 	    local: 'remote',
-	    showToolbar: false,
 	    toolbarItem: 'del',
+	    showToolbar: false,
 	    filterThead:false,
+	    columnMenu:false,
+	    fieldSortable:false,
 	    dataUrl:"profitUser.do?type=findProfitUserByWhere",
 	    columns: [
               {
